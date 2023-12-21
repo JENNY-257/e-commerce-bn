@@ -1,7 +1,8 @@
 import user from '../models/userModel.js';
 import bcrypt from 'bcrypt';
+import generateToken from '../utils/generateToken.js';
 
-const  userRegister = async(req,res) =>{
+export const  userRegister = async(req,res) =>{
     try {
         const {firstName, lastName, email, password, role, isActive} = req.body;
 
@@ -25,7 +26,12 @@ const  userRegister = async(req,res) =>{
             isActive
 
         });
-        return res.status(200).json({message:"user created succesfully", createUser})
+
+        const userTokenSignup = await generateToken({email:createUser.email,role:createUser.role})
+        return res.status(200).json(
+            {message:"user created succesfully",
+            userTokenSignup,
+            createUser})
     
     } catch (error) {
         console.log(error);
@@ -33,4 +39,3 @@ const  userRegister = async(req,res) =>{
     }
 }
 
-export default userRegister;
