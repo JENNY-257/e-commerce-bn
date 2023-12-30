@@ -1,4 +1,4 @@
-import user from '../models/userModel.js';
+import User from '../models/userModel.js';
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
 
@@ -9,7 +9,7 @@ export const userRegister = async(req,res) =>{
         const {firstName, lastName, email, password, role, isActive} = req.body;
 
 
-        const checkEmailExist=  await user.findOne({email:email})
+        const checkEmailExist=  await User.findOne({email:email})
 
         if(checkEmailExist){
             return res.status(400).json({meassage:"email aleady exists"});
@@ -22,10 +22,11 @@ export const userRegister = async(req,res) =>{
       
         const userActivationToken = jwt.sign(
             {email:email},
-            process.env.JWT_SECRET_KEY
+            process.env.JWT_SECRET_KEY,
+            { expiresIn: '1h' }
             )
 
-            const createUser = await user.create({
+            const createUser = await User.create({
                 firstName,
                 lastName,
                 email,
@@ -59,6 +60,29 @@ export const userRegister = async(req,res) =>{
         console.log(error);
         return res.status(500).json({message:"failed to create user account"})
     }
-}
+};
 
-export default userRegister;
+export const verificationEmail = async(req, res) => {
+    try {
+        const {userActivationToken} = req.params;
+        const verifyToken = jwt.verify(userActivationToken, process.env.JWT_SECRET_KEY);
+        const {email} = verifyToken;
+        const user = await User.findOne({email});
+
+        if(!user){
+            return res.status(404).json({message:"User not found"});
+        }
+        if(user.verified){
+            return res.statu(400).json({message:"email already in use"});
+        }
+        user.verified = true;
+      await user.save();
+      return res.status(201).json({message:"Account activated succesfully"});
+    } catch (error) {
+        return res.status(500).json({message:"failed to activate email"})
+    }
+
+};
+
+
+

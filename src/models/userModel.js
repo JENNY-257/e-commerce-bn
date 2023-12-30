@@ -24,8 +24,13 @@ const userSchema = new mongoose.Schema({
     isActive:{
         type:String,
         default:true
-    }
+    },
+    verified: {
+        type: Boolean,
+        default: false,
+      },
+
 });
 
-const user = mongoose.model('User', userSchema)
-export  default user;
+const User = mongoose.model('User', userSchema)
+export  default User;
