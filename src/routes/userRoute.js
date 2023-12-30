@@ -1,9 +1,11 @@
 import { Router } from "express";
-import userRegister from "../controllers/userController.js";
+import { userRegister, verificationEmail } from "../controllers/userController.js";
+import { signupValidationschema } from "../validations/userValidation.js";
 
 const userRoute = Router();
 
-userRoute.post('/signup',userRegister);
+userRoute.post('/signup', signupValidationschema, userRegister);
+userRoute.get('/activate-account/:userActivationToken', verificationEmail)
 
 
 export default userRoute;
